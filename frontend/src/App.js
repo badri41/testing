@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useWeb3React } from '@web3-react/core';
+import { useWeb3React, Web3ReactProvider } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
 import StreamingDApp from './components/StreamingDApp';
 import ProfileSetup from './components/ProfileSetup';
@@ -8,10 +8,24 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import ErrorMessage from './components/common/ErrorMessage';
 import './App.css';
 
+const {Web3Provider} = require('@ethersproject/providers');
 // Initialize Web3 connector for supported networks
 const injected = new InjectedConnector({
   supportedChainIds: [1, 3, 4, 5, 42, 1337] // Mainnet, testnets, and local network
 });
+
+// Define the connectors array
+const connectors = [
+  [injected, 'Injected'],
+  // You can add more connectors here if needed
+];
+
+
+function getLibrary(provider) {
+  const library = new Web3Provider(provider);
+  library.pollingInterval = 12000;
+  return library;
+}
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component {
@@ -106,15 +120,11 @@ function AppContent() {
 
   const connectWallet = async () => {
     try {
-      if (window.ethereum) {
-        await activate(injected, undefined, true);
-        localStorage.setItem('wasConnected', 'true');
-      } else {
-        setError('Please install MetaMask to use this application');
-      }
+      await activate(injected);
+      localStorage.setItem('wasConnected', 'true');
     } catch (err) {
-      console.error('Connection error:', err);
-      setError(err.message || 'Failed to connect wallet');
+      setError('Failed to connect wallet. Please make sure MetaMask is installed and unlocked.');
+      console.error(err);
     }
   };
 
@@ -260,9 +270,11 @@ function AppContent() {
 // Main App component
 function App() {
   return (
-    <ErrorBoundary>
-      <AppContent />
-    </ErrorBoundary>
+    <Web3ReactProvider getLibrary={getLibrary} connectors={connectors}>
+      <ErrorBoundary>
+        <AppContent />
+      </ErrorBoundary>
+    </Web3ReactProvider>
   );
 }
 

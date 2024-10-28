@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { Web3ReactProvider } from '@web3-react/core';
-import { ethers } from 'ethers';
+const { ethers } = require('ethers');
 
 // Updated getLibrary function for ethers v6
 function getLibrary(provider) {

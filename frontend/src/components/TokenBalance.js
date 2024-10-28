@@ -1,7 +1,8 @@
 // frontend/src/components/TokenBalance.js
 import React from 'react';
 import { useWeb3React } from '@web3-react/core';
-import { Contract, formatEther } from 'ethers';
+// CommonJS require style
+const { Contract, formatEther } = require('ethers');
 
 const TokenBalance = ({ tokenAddress }) => {
   const { account, library } = useWeb3React();
